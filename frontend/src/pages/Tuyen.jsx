@@ -38,6 +38,11 @@ export default function Tuyen() {
             dataField: "GIO_KH",
             text: "Giờ khởi hành",
             sort: true,
+            formatter: (value) => (
+                <span>
+                  {new Date(value).toLocaleTimeString('vi-VN')}
+                </span>
+            )
         },
         {
             dataField: "THOI_GIAN_VC",
@@ -97,8 +102,6 @@ function RoomDescription(props) {
     const handleInputChange = e => {
         console.log("EDIT")
         const { name, value } = e.target
-        console.log(name);
-        console.log(value);
         setValues({
             ...values,
             [name]: value
@@ -158,7 +161,7 @@ function RoomDescription(props) {
         <div className="popup-box">
             <Modal.Dialog className="popup-content">
                 <Modal.Header closeButton onClick={() => setEmplDescription({id: -1})}>
-                    <Modal.Title>Tuyến</Modal.Title>
+                    <Modal.Title>{data.MA_SO_TUYEN !== undefined ? "Thông tin tuyến" : "Thêm tuyến"}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
@@ -174,7 +177,7 @@ function RoomDescription(props) {
                         <div className="row">
                             <Form.Group className="mb-3 col-5" controlId="startTime">
                                 <Form.Label>Giờ khởi hành</Form.Label>
-                                <Form.Control name='startTime' type="text" placeholder="hh:mm" defaultValue={initialFValues.startTime} onChange={handleInputChange}/>
+                                <Form.Control name='startTime' type="text" placeholder="hh:mm::ss" defaultValue={initialFValues.startTime} onChange={handleInputChange}/>
                             </Form.Group>
                             <Form.Group className="mb-3 col-5" controlId="lengthTime">
                                 <Form.Label>Thời gian</Form.Label>

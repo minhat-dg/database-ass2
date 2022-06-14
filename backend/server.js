@@ -23,7 +23,7 @@ app.use(express.urlencoded({ extended: true }));
 
 require("./routes/tuyen.js")(app);
 require("./routes/nhanvien.js")(app);
-
+require("./routes/chuyen.js")(app);
 // simple route
 app.get("/", (req, res) => {
     res.json({ message: "HELLO" });
@@ -35,3 +35,4 @@ const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}.`);
 });
+

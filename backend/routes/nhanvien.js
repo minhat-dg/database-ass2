@@ -6,5 +6,11 @@ module.exports = app => {
     // Create a new Account
     router.post("/", nhanvien.create);
 
+    router.put("/:id", nhanvien.update);
+
+    router.delete("/:id", nhanvien.delete);
+
+    router.get("/", nhanvien.getAll);
+
     app.use('/api/nhanvien', router);
   };

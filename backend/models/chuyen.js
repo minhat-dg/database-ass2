@@ -1,77 +1,41 @@
 var sql = require('mssql/msnodesqlv8');
 var config = require('./db-config.js')
 
-const Nhanvien = function(nhanvien) {
-    this.id = nhanvien.id;
-    this.name = nhanvien.name;
-    this.sex = nhanvien.sex;
-    this.inDay = nhanvien.inDay;
-    this.dob = nhanvien.dob;
-    this.salary = nhanvien.salary;
-    this.homeNumber = nhanvien.homeNumber;
-    this.street = nhanvien.street;
-    this.province = nhanvien.province;
-    this.phone = nhanvien.phone;
+const Chuyen = function(chuyen) {
+    this.id = chuyen.id;
+    this.carNum= chuyen.carNum;
+    this.tuyenId = chuyen.tuyenId;
+    this.date = chuyen.date;
+    this.cost = chuyen.cost;
 }
 
-Nhanvien.create = (nhanvien, result) => {
+Chuyen.create = (chuyen, result) => {
 
     sql.connect(config, function(err){
         if(err){
             console.log(err);
         } else {
             var request = new sql.Request();
-            //var query = `INSERT INTO NHAN_VIEN VALUES ('${nhanvien.id}','${nhanvien.name}','${nhanvien.sex}',convert(datetime,'${nhanvien.inDay}',105),convert(datetime,'${nhanvien.dob}',105),${nhanvien.salary},'${nhanvien.homeNumber}','${nhanvien.street}','${nhanvien.province}','${nhanvien.phone}')`;
-            var query = `EXEC THEM_NHAN_VIEN '${nhanvien.id}','${nhanvien.name}','${nhanvien.sex}','${nhanvien.inDay}','${nhanvien.dob}',${nhanvien.salary},'${nhanvien.homeNumber}','${nhanvien.street}','${nhanvien.province}','${nhanvien.phone}'`
-            console.log(query);
+            var query = `INSERT INTO CHUYEN VALUES ('${chuyen.id}','${chuyen.carNum}',${chuyen.tuyenId},convert(datetime,'${chuyen.date}',105),${chuyen.cost})`;
             request.query(query,(err, res, fields) => {
                 if (err) {
                     console.log("errorrrr: ", err);
                     result(err, null);
                     return;
                 }
-                result(null, { id: res.insertId, ...nhanvien });
+                result(null, { id: res.insertId, ...chuyen });
             });
         }
     })
 }
 
-Nhanvien.update = (nhanvien, result) => {
-
-    sql.connect(config, function(err){
-        if(err){
-            console.log(err);
-        } else {
-            var request = new sql.Request();
-            //var query = `UPDATE NHAN_VIEN SET MA_NHAN_VIEN='${nhanvien.id}',HO_VA_TEN='${nhanvien.name}',GIOI_TINH='${nhanvien.sex}',NGAY_VAO_LAM=convert(datetime,'${nhanvien.inDay}',105),NGAY_SINH=convert(datetime,'${nhanvien.dob}',105),${nhanvien.salary},'${nhanvien.homeNumber}','${nhanvien.street}','${nhanvien.province}','${nhanvien.phone}')`;
-            var query = `EXEC CAP_NHAT_NHAN_VIEN '${nhanvien.id}','${nhanvien.id}','${nhanvien.name}','${nhanvien.sex}','${nhanvien.inDay}','${nhanvien.dob}',${nhanvien.salary},'${nhanvien.homeNumber}','${nhanvien.street}','${nhanvien.province}','${nhanvien.phone}'`
-            console.log(query);
-            request.query(query,(err, res, fields) => {
-                if (err) {
-                    console.log("error: ", err);
-                    result(null, err);
-                    return;
-                }
-        
-                if (res.affectedRows == 0) {
-                    // not found nhanvien
-                    result({ kind: "not_found" }, null);
-                    return;
-                }
-                
-                result(null, res);
-            });
-        }
-    })
-}
-
-Nhanvien.delete = (id, result) => {
+Chuyen.update = (chuyen, result) => {
     sql.connect(config, function(err){
         if(err){
             console.log(err);
         } else {
             var request = new sql.Request();   
-            var query = `EXEC XOA_NHAN_VIEN ${id}`;
+            var query = `UPDATE CHUYEN SET MA_SO_CHUYEN = '${chuyen.id}',PHUONG_TIEN = '${chuyen.carNum}',MA_SO_TUYEN = ${chuyen.tuyenId},NGAY_DI = convert(datetime,'${chuyen.date}',105),KINH_PHI = ${chuyen.cost} WHERE MA_SO_CHUYEN = ${chuyen.id}`;
             console.log("QUERY: "+query)
             request.query(query,(err, res, fields) => {
                 if (err) {
@@ -81,7 +45,33 @@ Nhanvien.delete = (id, result) => {
                 }
         
                 if (res.affectedRows == 0) {
-                // not found Nhanvien with id
+                    result({ kind: "not_found" }, null);
+                    return;
+                }
+                
+                result(null, res);
+            });
+        }
+    })
+};
+
+Chuyen.delete = (id, result) => {
+    sql.connect(config, function(err){
+        if(err){
+            console.log(err);
+        } else {
+            var request = new sql.Request();   
+            var query = `DELETE FROM CHUYEN WHERE MA_SO_CHUYEN = ${id}`;
+            console.log("QUERY: "+query)
+            request.query(query,(err, res, fields) => {
+                if (err) {
+                    console.log("error: ", err);
+                    result(null, err);
+                    return;
+                }
+        
+                if (res.affectedRows == 0) {
+                // not found CHUYEN with id
                 result({ kind: "not_found" }, null);
                 return;
                 }
@@ -92,13 +82,13 @@ Nhanvien.delete = (id, result) => {
     })
 };
 
-Nhanvien.getAll = (title, result) => {
+Chuyen.getAll = (title, result) => {
     sql.connect(config, function(err){
         if(err){
             console.log(err);
         } else {
             var request = new sql.Request();   
-            var query = "SELECT * FROM NHAN_VIEN";
+            var query = "SELECT * FROM CHUYEN";
             console.log("QUERY: "+query)
             request.query(query,(err, res) => {
                 if (err) {
@@ -107,11 +97,34 @@ Nhanvien.getAll = (title, result) => {
                     return;
                 }
         
-                console.log("Nhanvien: ", res);
+                console.log("Chuyen: ", res);
                 result(null, res);
             });
         }
     })
 };
 
-module.exports = Nhanvien;
+Chuyen.getByTuyenId = (id, result) => {
+    sql.connect(config, function(err){
+        if(err){
+            console.log(err);
+        } else {
+            var request = new sql.Request();   
+            var query = `SELECT * FROM CHUYEN WHERE MA_SO_TUYEN = ${id}`;
+            console.log("QUERY: "+query)
+            request.query(query,(err, res) => {
+                if (err) {
+                    console.log("error: ", err);
+                    result(null, err);
+                    return;
+                }
+        
+                console.log("Chuyen: ", res);
+                result(null, res);
+            });
+        }
+    })
+};
+
+
+module.exports = Chuyen;

@@ -13,10 +13,12 @@ export default function Chuyen() {
     const [datas, setData] = useState([]);
     const [emplDescription, setEmplDescription] = useState({ id: -1 })
     const [tuyen, setTuyen] = useState([])
+    const [selectedTuyen, setSelectedTuyen] = useState('0')
 
     const handleShowAdd = () => { setEmplDescription(0) };
     
     React.useEffect(()=>{
+        console.log("USE EFFECT CALLED")
         axios.get('http://localhost:8080/api/tuyen/')
         .then(response=>{
           console.log(response.data.recordset);
@@ -25,32 +27,52 @@ export default function Chuyen() {
         .catch(error=>{
           console.log(error);
         })
-      }, []) 
+        
+        var api = 'http://localhost:8080/api/chuyen/';
+        if(selectedTuyen !== '0'){
+            api = api + selectedTuyen;
+        }
+        console.log(api)
+        axios.get(api)
+        .then(response=>{
+          console.log(response.data.recordset);
+          setData(response.data.recordset);
+        })
+        .catch(error=>{
+          console.log(error);
+        })
+      }, [selectedTuyen]) 
+
 
 
     const columns = [
         {
-            dataField: "id",
+            dataField: "MA_SO_CHUYEN",
             text: "Mã số chuyến",
             sort: true,
         },
         {
-            dataField: "vehicle",
+            dataField: "PHUONG_TIEN",
             text: "Biển số xe",
             sort: true,
         },
         {
-            dataField: "idTuyen",
+            dataField: "MA_SO_TUYEN",
             text: "Mã số tuyến",
             sort: true,
         },
         {
-            dataField: "date",
+            dataField: "NGAY_DI",
             text: "Ngày đi",
             sort: true,
+            formatter: (value) => (
+                <span>
+                  {new Date(value).toLocaleDateString('vi-VN')}
+                </span>
+            )
         },
         {
-            dataField: "cost",
+            dataField: "KINH_PHI",
             text: "Chi phí",
             sort: true,
         },
@@ -64,16 +86,20 @@ export default function Chuyen() {
         },
     };
 
+    const handleSelect = e => {
+        setSelectedTuyen(e.target.value)
+    }
+
 
     return (
         <div className="container my-5">
             {emplDescription.id === -1 ? <p /> : <RoomDescription data={emplDescription} setEmplDescription={setEmplDescription} />}
             <h4>Tuyến:</h4>
             <div className="my-3 container">
-                <FormSelect aria-label="Default select example">
-                    <option>Chọn tuyến</option>
+                <FormSelect aria-label="Default select example" value={selectedTuyen} onChange={handleSelect}>
+                    <option value={0}>Chọn tuyến</option>
                     {tuyen.map(tuyen => {
-                        return <option>{tuyen.TEN_TUYEN}</option>
+                        return <option value={tuyen.MA_SO_TUYEN}>{tuyen.TEN_TUYEN}</option>
                     })}
                 </FormSelect>
             </div>
@@ -105,11 +131,11 @@ export default function Chuyen() {
 function RoomDescription(props) {
     const { data, setEmplDescription } = props
     const initialFValues = {
-        id:data.MA_SO_TUYEN,
-        name: data.name,
-        sex: data.sex,
-        dob: data.dob,
-        phone: data.phone,
+        id:data.MA_SO_CHUYEN,
+        carNum: data.PHUONG_TIEN,
+        tuyenId: data.MA_SO_TUYEN,
+        date: new Date(data.NGAY_DI).toLocaleDateString('vi-VN'),
+        cost: data.KINH_PHI
     }
 
     const [values, setValues] = useState(initialFValues);
@@ -122,12 +148,13 @@ function RoomDescription(props) {
         })
     }
 
-    const addTuyen = e =>{
-        axios.post(`http://localhost:8080/api/tuyen/`, {
-          id: values.id,
-          name: values.name,
-          startTime: values.startTime,
-          lengthTime: values.lengthTime
+    const addChuyen = e =>{
+        axios.post(`http://localhost:8080/api/chuyen/`, {
+            id: values.id,
+            carNum: values.carNum,
+            tuyenId: values.tuyenId,
+            date: values.date,
+            cost: values.cost
         })
         .then(response => {
           console.log(response);
@@ -139,41 +166,78 @@ function RoomDescription(props) {
         })
       }
 
+      const editChuyen = e => {
+        console.log("EDIT")
+        axios.put(`http://localhost:8080/api/chuyen/${values.id}`, {
+            id: values.id,
+            carNum: values.carNum,
+            tuyenId: values.tuyenId,
+            date: values.date,
+            cost: values.cost
+        })
+        .then(response => {
+          console.log(response);
+          window.location.reload();
+        })
+        .catch(error => {
+          console.log(error);
+          alert('Invalid input');
+        })
+    }
+
+    const deleteChuyen = e => {
+        console.log("DELETE");
+        axios.delete(`http://localhost:8080/api/chuyen/${values.id}`)
+        .then(response => {
+          console.log(response);
+          window.location.reload();
+        })
+        .catch(error => {
+            console.log(error);
+            alert('Deleting failed');
+        })
+    }
+
     return (
         <div className="popup-box">
             <Modal.Dialog className="popup-content">
                 <Modal.Header closeButton onClick={() => setEmplDescription({id: -1})}>
-                    <Modal.Title>Thêm tuyến</Modal.Title>
+                    <Modal.Title>{data.MA_SO_CHUYEN !== undefined ? "Thông tin chuyến" : "Thêm chuyến"}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
-                        <Form.Group className="mb-3" controlId="id">
-                            <Form.Label>Mã tuyến</Form.Label>
-                            <Form.Control type="text" placeholder="Nhập mã tuyến" value={initialFValues.id} onChange={handleInputChange}/>
-                        </Form.Group>
-
-                        <Form.Group className="mb-3" controlId="name">
-                            <Form.Label>Tên tuyến</Form.Label>
-                            <Form.Control type="text" placeholder="Tên tuyến" value={initialFValues.name} onChange={handleInputChange}/>
+                    <div className="row">
+                            <Form.Group className="mb-3 col-5" controlId="id">
+                                <Form.Label>Mã chuyến</Form.Label>
+                                <Form.Control name='id' type="text" placeholder="" defaultValue={initialFValues.id} onChange={handleInputChange}/>
+                            </Form.Group>
+                            <Form.Group className="mb-3 col-5" controlId="tuyenId">
+                                <Form.Label>Mã tuyến</Form.Label>
+                                <Form.Control name='tuyenId' type="text" placeholder="" defaultValue={initialFValues.tuyenId} onChange={handleInputChange}/>
+                            </Form.Group>
+                        </div>
+                        <Form.Group className="mb-3 col-10" controlId="carNum">
+                            <Form.Label>Phương tiện</Form.Label>
+                            <Form.Control name="carNum" type="text" placeholder="" defaultValue={initialFValues.carNum} onChange={handleInputChange}/>
                         </Form.Group>
                         <div className="row">
-                            <Form.Group className="mb-3 col-5" controlId="startTime">
-                                <Form.Label>Giờ khởi hành</Form.Label>
-                                <Form.Control type="text" placeholder="hh:mm" value={initialFValues.sex} onChange={handleInputChange}/>
+                            <Form.Group className="mb-3 col-5" controlId="date">
+                                <Form.Label>Ngày đi</Form.Label>
+                                <Form.Control name="date" type="text" placeholder="" defaultValue={initialFValues.date} onChange={handleInputChange}/>
                             </Form.Group>
-                            <Form.Group className="mb-3 col-5" controlId="lengthTime">
-                                <Form.Label>Thời gian</Form.Label>
-                                <Form.Control type="text" placeholder="Thời gian di chuyển" value={initialFValues.dob} onChange={handleInputChange}/>
+                            <Form.Group className="mb-3 col-5" controlId="cost">
+                                <Form.Label>Kinh phí</Form.Label>
+                                <Form.Control name="cost" type="text" placeholder="" defaultValue={initialFValues.cost} onChange={handleInputChange}/>
                             </Form.Group>
                         </div>
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setEmplDescription({id: -1})}>
-                        Hủy
-                    </Button>
-                    <Button variant="primary" onClick={() => setEmplDescription({id: -1})}>
-                        Thêm
+                {data.MA_SO_CHUYEN !== undefined && <Button className='delBtn' variant="secondary" onClick={deleteChuyen}>
+                            Xóa
+                        </Button>}
+                    <Button variant="primary" onClick={data.MA_SO_CHUYEN === undefined ? addChuyen : editChuyen}>
+                        Lưu
                     </Button>
                 </Modal.Footer>
             </Modal.Dialog>
