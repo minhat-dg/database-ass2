@@ -108,13 +108,13 @@ function RoomDescription(props) {
     const initialFValues = {
         id:data.MA_NHAN_VIEN,
         name: data.HO_VA_TEN,
-        sex: (data.GIOI_TINH === "M") ? "Nam" : "Nữ",
-        dob: new Date(data.NGAY_SINH).toLocaleDateString('vi-VN'),
+        sex: data.GIOI_TINH === undefined ? "" : ((data.GIOI_TINH === "M") ? "Nam" : "Nữ"),
+        dob: data.NGAY_SINH === undefined ? "" : new Date(data.NGAY_SINH).toLocaleDateString('vi-VN'),
         phone: data.SDT_NOI_BO,
         homeNumber: data.SO_NHA,
         street: data.TEN_DUONG,
         province: data.TINH,
-        inDay: new Date(data.NGAY_VAO_LAM).toLocaleDateString('vi-VN'),
+        inDay: data.NGAY_VAO_LAM === undefined ? "" : new Date(data.NGAY_VAO_LAM).toLocaleDateString('vi-VN'),
         salary: data.LUONG,
     }
 
@@ -228,7 +228,7 @@ function RoomDescription(props) {
                             </Form.Group>
                             <Form.Group className="mb-3 col-4" controlId="province">
                                 <Form.Label>Tỉnh</Form.Label>
-                                <Form.Control name='province' type="text" placeholder="" value={initialFValues.province} onChange={handleInputChange}/>
+                                <Form.Control name='province' type="text" placeholder="" defaultValue={initialFValues.province} onChange={handleInputChange}/>
                             </Form.Group>
                         </div>
                         <div className="row">
@@ -242,7 +242,7 @@ function RoomDescription(props) {
                             </Form.Group>
                             <Form.Group className="mb-3 col-5" controlId="formName">
                                 <Form.Label>Số điện thoại nội bộ</Form.Label>
-                                <Form.Control name='phone' type="text" placeholder="" value={initialFValues.phone} onChange={handleInputChange}/>
+                                <Form.Control name='phone' type="text" placeholder="" defaultValue={initialFValues.phone} onChange={handleInputChange}/>
                             </Form.Group>
                         </div>
 

@@ -134,7 +134,7 @@ function RoomDescription(props) {
         id:data.MA_SO_CHUYEN,
         carNum: data.PHUONG_TIEN,
         tuyenId: data.MA_SO_TUYEN,
-        date: new Date(data.NGAY_DI).toLocaleDateString('vi-VN'),
+        date: data.NGAY_DI === undefined ? "" : new Date(data.NGAY_DI).toLocaleDateString('vi-VN'),
         cost: data.KINH_PHI
     }
 
